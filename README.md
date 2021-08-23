@@ -16,12 +16,13 @@ Candidado deverá acessar o Swagger http://fakerestapi.azurewebsites.net/
 e automatizar o endpoint /api/v1/Books, deverá criar um book 
 
 - Deverá criar um book (POST)
-Title: ”Automatizando uma API",
-Description: ”teste@store.com.br",
-PageCount : 10
-Excerpt: ”Resumo do teste”
-PublishDate: “2020-09-10T13:00:00.549505+00:00"
-id: "50"
+
+  Title: ”Automatizando uma API"
+  Description: ”teste@learntofly.global"
+  PageCount : 10
+  Excerpt: ”Resumo do teste”
+  PublishDate: “2020-09-10T13:00:00.549505+00:00"
+  id: "50"
 
 - Deverá fazer a leitura do livro recém criado
 Fazer um GET e retornar o livro que acabou de ser criado
