@@ -1,7 +1,7 @@
 Desafio QA 
 
 1- Desafio WEB 
-Candidato deverá automatizar o site da learn to fly https://pages.devmania.com.br/pt/home
+Candidato deverá automatizar o site da learn to fly https://hml-pages.learntofly.global/pt/home
 
 - Acessar a landing page da learn to fly
 - Acessar o menu Preços e planos 
