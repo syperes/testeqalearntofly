@@ -1,0 +1,20 @@
+{
+  "name": "qa-learntofly",
+  "version": "1.0.0",
+  "description": "Prova QA",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "cypress:open": "cypress open"
+  },
+  "keywords": [
+    "qa",
+    "prova",
+    "learntofly"
+  ],
+  "author": "Fellipe Romanelli",
+  "license": "ISC",
+  "dependencies": {
+    "cypress": "^9.2.0"
+  }
+}

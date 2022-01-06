@@ -1,0 +1,13 @@
+{
+    "env": {
+        "name": "Nome de Teste",
+        "email": "emaildeteste@emaildeteste.com",
+        "password": "123456",
+        "id": 50,
+        "title": "Automatizando uma API",
+        "description": "teste@learntofly.global",
+        "pageCount": 10,
+        "excerpt": "Resumo do teste",
+        "publishDate": "2020-09-10T13:00:00.549505+00:00"
+    }
+}
