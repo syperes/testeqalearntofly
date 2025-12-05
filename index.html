@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor CSV para TXT Posicional - OdontoPREV</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .upload-area {
+            border: 3px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            background: #f9f9f9;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f0f0ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #e8ebff;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .delimiter-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .delimiter-option {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .delimiter-option:hover {
+            border-color: #667eea;
+        }
+
+        .delimiter-option.selected {
+            border-color: #667eea;
+            background: #e8ebff;
+            font-weight: 600;
+        }
+
+        .mapping-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .column-list, .field-list {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .list-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        .draggable-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            cursor: move;
+            transition: all 0.2s ease;
+        }
+
+        .draggable-item:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .draggable-item.dragging {
+            opacity: 0.5;
+        }
+
+        .drop-zone {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: white;
+            border: 2px dashed #dee2e6;
+            border-radius: 5px;
+            min-height: 45px;
+            transition: all 0.2s ease;
+        }
+
+        .drop-zone.dragover {
+            border-color: #667eea;
+            background: #e8ebff;
+        }
+
+        .drop-zone.mapped {
+            border-style: solid;
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .field-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .field-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .field-size {
+            font-size: 12px;
+            color: #6c757d;
+            background: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+
+        .required-badge {
+            background: #dc3545;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+
+        .mapped-column {
+            font-size: 13px;
+            color: #28a745;
+            margin-top: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .remove-mapping {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .remove-mapping:hover {
+            background: #c82333;
+        }
+
+        .error-list {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .error-item {
+            color: #721c24;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .preview-container {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .preview-text {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            white-space: pre;
+            overflow-x: auto;
+            background: white;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+        }
+
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .config-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .config-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .config-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .config-list {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .config-item {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .config-item button {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .info-text {
+            color: #6c757d;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        select {
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 968px) {
+            .mapping-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Conversor CSV para TXT Posicional</h1>
+            <p>OdontoPREV - Sistema de Conversão de Arquivos</p>
+        </header>
+
+        <div class="content">
+            <!-- Seção de Upload -->
+            <div class="section">
+                <h2 class="section-title">1. Upload do Arquivo CSV</h2>
+
+                <div class="delimiter-selector">
+                    <div class="delimiter-option selected" data-delimiter=",">
+                        <strong>Vírgula</strong><br><small>,</small>
+                    </div>
+                    <div class="delimiter-option" data-delimiter=";">
+                        <strong>Ponto-e-vírgula</strong><br><small>;</small>
+                    </div>
+                    <div class="delimiter-option" data-delimiter="\t">
+                        <strong>Tab</strong><br><small>\t</small>
+                    </div>
+                    <div class="delimiter-option" data-delimiter="|">
+                        <strong>Pipe</strong><br><small>|</small>
+                    </div>
+                </div>
+
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" class="file-input" accept=".csv">
+                    <p style="font-size: 48px; margin-bottom: 10px;">📁</p>
+                    <p style="font-size: 16px; font-weight: 600; margin-bottom: 5px;">
+                        Arraste o arquivo CSV aqui ou clique para selecionar
+                    </p>
+                    <p style="font-size: 13px; color: #6c757d;">
+                        Tamanho máximo: 10 MB | Formato: .csv | Encoding: UTF-8
+                    </p>
+                </div>
+                <p class="info-text" id="fileInfo"></p>
+            </div>
+
+            <!-- Seção de Configurações -->
+            <div class="section hidden" id="configSection">
+                <h2 class="section-title">2. Configurações de Mapeamento</h2>
+                <div class="config-section">
+                    <div class="config-controls">
+                        <input type="text" id="configName" class="config-input" placeholder="Nome da configuração...">
+                        <button class="btn btn-secondary" onclick="saveConfiguration()">Salvar Configuração</button>
+                        <select id="configSelect" class="config-input" onchange="loadSelectedConfiguration()">
+                            <option value="">-- Carregar Configuração --</option>
+                        </select>
+                    </div>
+                    <div class="config-list" id="configList"></div>
+                </div>
+            </div>
+
+            <!-- Seção de Mapeamento -->
+            <div class="section hidden" id="mappingSection">
+                <h2 class="section-title">3. Mapeamento de Campos</h2>
+                <div class="mapping-container">
+                    <div class="column-list">
+                        <div class="list-title">Colunas do CSV</div>
+                        <div id="csvColumns"></div>
+                    </div>
+                    <div class="field-list">
+                        <div class="list-title">Campos do TXT (Layout Posicional)</div>
+                        <div id="txtFields"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="section hidden" id="actionsSection">
+                <h2 class="section-title">4. Ações</h2>
+                <div style="text-align: center;">
+                    <button class="btn btn-secondary" onclick="showPreview()">Visualizar Prévia (10 linhas)</button>
+                    <button class="btn btn-success" onclick="generateFile()">Gerar Arquivo Completo</button>
+                </div>
+
+                <!-- Barra de Progresso -->
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill">0%</div>
+                    </div>
+                    <p class="info-text" id="progressText"></p>
+                </div>
+
+                <!-- Erros -->
+                <div id="errorContainer"></div>
+
+                <!-- Prévia -->
+                <div id="previewContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado da aplicação
+        let csvData = [];
+        let csvHeaders = [];
+        let delimiter = ',';
+        let fieldMapping = {};
+
+        // Layout dos campos TXT (baseado no código de referência)
+        const txtLayout = [
+            { name: 'Espaço inicial', size: 45, required: false },
+            { name: 'Identificacao', size: 0, required: false }, // variável
+            { name: 'Espaco_1', size: 2, required: false },
+            { name: 'DataNascimento', size: 10, required: false },
+            { name: 'TelefoneComercial', size: 20, required: false },
+            { name: 'Endereco', size: 40, required: false },
+            { name: 'Cidade', size: 30, required: false },
+            { name: 'UF', size: 2, required: false },
+            { name: 'CEP', size: 9, required: false },
+            { name: 'TelefoneResidencial', size: 15, required: false },
+            { name: 'RG', size: 20, required: false },
+            { name: 'EstadoCivil', size: 10, required: false },
+            { name: 'Espaco_2', size: 20, required: false },
+            { name: 'Espaco_3', size: 20, required: false },
+            { name: 'Parentesco', size: 10, required: false },
+            { name: 'Carteirinha', size: 9, required: false },
+            { name: 'Acao', size: 0, required: false }, // variável
+            { name: 'Matricula', size: 18, required: false },
+            { name: 'CPF', size: 11, required: true },
+            { name: 'Sexo', size: 1, required: false },
+            { name: 'NomeMae', size: 70, required: false },
+            { name: 'Espaco_4', size: 11, required: false },
+            { name: 'DataAdesao', size: 10, required: false },
+            { name: 'CodigoDaEmpresa', size: 20, required: false },
+            { name: 'Espaco_5', size: 20, required: false },
+            { name: 'Bairro', size: 20, required: false },
+            { name: 'Espaco_6', size: 38, required: false },
+            { name: 'Espaco_7', size: 1, required: false },
+            { name: 'Email', size: 50, required: false },
+            { name: 'Espaco_8', size: 107, required: false },
+            { name: 'DataExclusao', size: 10, required: false },
+            { name: 'Espaco_9', size: 18, required: false },
+            { name: 'Espaco_10', size: 20, required: false },
+            { name: 'Espaco_11', size: 2, required: false },
+            { name: 'Espaco_12', size: 1, required: false },
+            { name: 'Espaco_13', size: 4, required: false },
+            { name: 'Espaco_14', size: 6, required: false },
+            { name: 'Espaco_15', size: 11, required: false },
+            { name: 'Espaco_16', size: 3, required: false },
+            { name: 'Espaco_17', size: 3, required: false },
+            { name: 'Complemento', size: 20, required: false },
+            { name: 'Espaco_18', size: 1, required: false },
+            { name: 'Espaco_19', size: 45, required: false },
+            { name: 'Espaco_20', size: 45, required: false },
+            { name: 'Espaco_21', size: 45, required: false },
+            { name: 'Espaco_22', size: 45, required: false },
+            { name: 'Espaco_23', size: 45, required: false },
+            { name: 'OrgaoRG', size: 30, required: false },
+            { name: 'Espaco_24', size: 151, required: false },
+            { name: 'Nome', size: 70, required: true },
+            { name: 'CodigoPlano', size: 4, required: false },
+            { name: 'Espaco_25', size: 20, required: false },
+            { name: 'Espaco_26', size: 15, required: false },
+            { name: 'Espaco_27', size: 3, required: false },
+            { name: 'Espaco_28', size: 7, required: false },
+            { name: 'Espaco_29', size: 1, required: false },
+            { name: 'Espaco_30', size: 5, required: false },
+            { name: 'Espaco_31', size: 1, required: false },
+            { name: 'Espaco_32', size: 30, required: false },
+            { name: 'Espaco_33', size: 11, required: false },
+            { name: 'Espaco_34', size: 20, required: false },
+            { name: 'Espaco_35', size: 9, required: false },
+            { name: 'Espaco_36', size: 1, required: false },
+            { name: 'Espaco_37', size: 4, required: false },
+            { name: 'Espaco_38', size: 1, required: false }
+        ];
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            setupDelimiterSelector();
+            setupUploadArea();
+            loadSavedConfigurations();
+        });
+
+        // Configuração do seletor de delimitador
+        function setupDelimiterSelector() {
+            document.querySelectorAll('.delimiter-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.delimiter-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    delimiter = this.getAttribute('data-delimiter');
+                    if (delimiter === '\\t') delimiter = '\t';
+
+                    // Reprocessar CSV se já foi carregado
+                    const fileInput = document.getElementById('fileInput');
+                    if (fileInput.files.length > 0) {
+                        processCSV(fileInput.files[0]);
+                    }
+                });
+            });
+        }
+
+        // Configuração da área de upload
+        function setupUploadArea() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileUpload(file);
+                }
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileUpload(e.target.files[0]);
+                }
+            });
+        }
+
+        // Validação e processamento do arquivo
+        function handleFileUpload(file) {
+            // Validações
+            if (!file.name.endsWith('.csv')) {
+                alert('Erro: Por favor, selecione um arquivo CSV (.csv)');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                alert('Erro: O arquivo excede o tamanho máximo de 10 MB');
+                return;
+            }
+
+            document.getElementById('fileInfo').textContent = `Arquivo carregado: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+            processCSV(file);
+        }
+
+        // Processar CSV
+        function processCSV(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const lines = content.split('\n').filter(line => line.trim());
+
+                if (lines.length === 0) {
+                    alert('Erro: Arquivo CSV vazio');
+                    return;
+                }
+
+                // Primeira linha é o cabeçalho
+                csvHeaders = parseCSVLine(lines[0]);
+                csvData = [];
+
+                // Processar dados
+                for (let i = 1; i < lines.length; i++) {
+                    const values = parseCSVLine(lines[i]);
+                    if (values.length > 0) {
+                        const row = {};
+                        csvHeaders.forEach((header, index) => {
+                            row[header] = values[index] || '';
+                        });
+                        csvData.push(row);
+                    }
+                }
+
+                displayMappingInterface();
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        // Parser de linha CSV (com suporte a aspas)
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === delimiter && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+
+            return result.map(val => val.replace(/^"|"$/g, ''));
+        }
+
+        // Exibir interface de mapeamento
+        function displayMappingInterface() {
+            document.getElementById('configSection').classList.remove('hidden');
+            document.getElementById('mappingSection').classList.remove('hidden');
+            document.getElementById('actionsSection').classList.remove('hidden');
+
+            // Resetar mapeamento
+            fieldMapping = {};
+
+            // Exibir colunas CSV
+            const csvColumnsDiv = document.getElementById('csvColumns');
+            csvColumnsDiv.innerHTML = '';
+            csvHeaders.forEach((header, index) => {
+                const item = document.createElement('div');
+                item.className = 'draggable-item';
+                item.draggable = true;
+                item.dataset.column = header;
+                item.textContent = header;
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+                csvColumnsDiv.appendChild(item);
+            });
+
+            // Exibir campos TXT
+            const txtFieldsDiv = document.getElementById('txtFields');
+            txtFieldsDiv.innerHTML = '';
+            txtLayout.forEach((field, index) => {
+                const dropZone = document.createElement('div');
+                dropZone.className = 'drop-zone';
+                dropZone.dataset.field = field.name;
+                dropZone.dataset.fieldIndex = index;
+
+                const fieldInfo = document.createElement('div');
+                fieldInfo.className = 'field-info';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'field-name';
+                nameSpan.textContent = field.name;
+                if (field.required) {
+                    const badge = document.createElement('span');
+                    badge.className = 'required-badge';
+                    badge.textContent = 'OBRIGATÓRIO';
+                    nameSpan.appendChild(badge);
+                }
+
+                const sizeSpan = document.createElement('span');
+                sizeSpan.className = 'field-size';
+                sizeSpan.textContent = field.size > 0 ? `${field.size} chars` : 'variável';
+
+                fieldInfo.appendChild(nameSpan);
+                fieldInfo.appendChild(sizeSpan);
+                dropZone.appendChild(fieldInfo);
+
+                dropZone.addEventListener('dragover', handleDragOver);
+                dropZone.addEventListener('drop', handleDrop);
+                dropZone.addEventListener('dragleave', handleDragLeave);
+
+                txtFieldsDiv.appendChild(dropZone);
+            });
+        }
+
+        // Handlers de drag and drop
+        let draggedColumn = null;
+
+        function handleDragStart(e) {
+            draggedColumn = e.target.dataset.column;
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+
+            const fieldName = e.currentTarget.dataset.field;
+            fieldMapping[fieldName] = draggedColumn;
+
+            updateFieldDisplay(e.currentTarget, draggedColumn);
+        }
+
+        function updateFieldDisplay(dropZone, columnName) {
+            // Remover mapeamento anterior se existir
+            const existingMapping = dropZone.querySelector('.mapped-column');
+            if (existingMapping) {
+                existingMapping.remove();
+            }
+
+            if (columnName) {
+                dropZone.classList.add('mapped');
+                const mappedDiv = document.createElement('div');
+                mappedDiv.className = 'mapped-column';
+                mappedDiv.innerHTML = `
+                    <span>← ${columnName}</span>
+                    <button class="remove-mapping" onclick="removeMapping('${dropZone.dataset.field}')">✕</button>
+                `;
+                dropZone.appendChild(mappedDiv);
+            } else {
+                dropZone.classList.remove('mapped');
+            }
+        }
+
+        function removeMapping(fieldName) {
+            delete fieldMapping[fieldName];
+            const dropZone = document.querySelector(`[data-field="${fieldName}"]`);
+            updateFieldDisplay(dropZone, null);
+        }
+
+        // Validações
+        function validateCPF(cpf) {
+            cpf = cpf.replace(/[^\d]/g, '');
+
+            if (cpf.length !== 11) return false;
+            if (/^(\d)\1+$/.test(cpf)) return false;
+
+            let sum = 0;
+            for (let i = 0; i < 9; i++) {
+                sum += parseInt(cpf.charAt(i)) * (10 - i);
+            }
+            let digit = 11 - (sum % 11);
+            if (digit >= 10) digit = 0;
+            if (digit !== parseInt(cpf.charAt(9))) return false;
+
+            sum = 0;
+            for (let i = 0; i < 10; i++) {
+                sum += parseInt(cpf.charAt(i)) * (11 - i);
+            }
+            digit = 11 - (sum % 11);
+            if (digit >= 10) digit = 0;
+            if (digit !== parseInt(cpf.charAt(10))) return false;
+
+            return true;
+        }
+
+        function validateDate(dateStr) {
+            if (!dateStr) return true; // Datas não obrigatórias
+            const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+            return regex.test(dateStr);
+        }
+
+        function validateData() {
+            const errors = [];
+
+            csvData.forEach((row, index) => {
+                const lineNumber = index + 2; // +2 porque linha 1 é header e index começa em 0
+
+                // Validar campos obrigatórios
+                if (fieldMapping['CPF']) {
+                    const cpf = row[fieldMapping['CPF']];
+                    if (!cpf || cpf.trim() === '') {
+                        errors.push(`Linha ${lineNumber}: Campo CPF é obrigatório`);
+                    } else if (!validateCPF(cpf)) {
+                        errors.push(`Linha ${lineNumber}: CPF inválido (${cpf})`);
+                    }
+                }
+
+                if (fieldMapping['Nome']) {
+                    const nome = row[fieldMapping['Nome']];
+                    if (!nome || nome.trim() === '') {
+                        errors.push(`Linha ${lineNumber}: Campo Nome é obrigatório`);
+                    } else if (nome.length > 70) {
+                        errors.push(`Linha ${lineNumber}: Nome excede 70 caracteres (${nome.length} caracteres)`);
+                    }
+                }
+
+                // Validar formatos de data
+                const dateFields = ['DataNascimento', 'DataAdesao', 'DataExclusao'];
+                dateFields.forEach(fieldName => {
+                    if (fieldMapping[fieldName]) {
+                        const dateValue = row[fieldMapping[fieldName]];
+                        if (dateValue && !validateDate(dateValue)) {
+                            errors.push(`Linha ${lineNumber}: ${fieldName} em formato inválido (esperado dd/MM/yyyy, recebido: ${dateValue})`);
+                        }
+                    }
+                });
+            });
+
+            // Validar se campos obrigatórios estão mapeados
+            if (!fieldMapping['CPF']) {
+                errors.push('Campo obrigatório CPF não foi mapeado');
+            }
+            if (!fieldMapping['Nome']) {
+                errors.push('Campo obrigatório Nome não foi mapeado');
+            }
+
+            return errors;
+        }
+
+        // Transformações
+        function removeAccents(str) {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+
+            // Se já está em dd/MM/yyyy, retorna
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+                return dateStr;
+            }
+
+            // Tenta converter de ISO (yyyy-MM-dd)
+            if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+                const parts = dateStr.split('-');
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+
+            return dateStr;
+        }
+
+        function convertSex(sex) {
+            if (!sex) return '';
+            const s = sex.toUpperCase().trim();
+            if (s === 'M' || s === 'MASCULINO') return '1';
+            if (s === 'F' || s === 'FEMININO') return '3';
+            return sex;
+        }
+
+        function montaTexto(valor, tamanho) {
+            valor = valor ? valor.toString() : '';
+            valor = removeAccents(valor); // Remover acentos
+
+            if (tamanho === 0) return valor; // Campo variável
+
+            if (valor.length > tamanho) {
+                return valor.substring(0, tamanho);
+            }
+            return valor.padEnd(tamanho, ' ');
+        }
+
+        // Gerar linha posicional
+        function gerarLinhaPosicional(row) {
+            let linha = '';
+
+            txtLayout.forEach(field => {
+                let valor = '';
+
+                // Se campo está mapeado, pegar valor do CSV
+                if (fieldMapping[field.name]) {
+                    valor = row[fieldMapping[field.name]] || '';
+
+                    // Aplicar transformações específicas
+                    if (field.name.includes('Data')) {
+                        valor = formatDate(valor);
+                    } else if (field.name === 'Sexo') {
+                        valor = convertSex(valor);
+                    } else if (field.name === 'CPF') {
+                        valor = valor.replace(/[^\d]/g, ''); // Apenas números
+                    }
+                }
+
+                linha += montaTexto(valor, field.size);
+            });
+
+            return linha;
+        }
+
+        // Prévia
+        function showPreview() {
+            const errors = validateData();
+
+            if (errors.length > 0) {
+                displayErrors(errors);
+                return;
+            }
+
+            const previewLines = csvData.slice(0, 10).map(row => gerarLinhaPosicional(row));
+
+            const previewContainer = document.getElementById('previewContainer');
+            previewContainer.innerHTML = `
+                <div class="preview-container">
+                    <h3 style="margin-bottom: 10px;">Prévia (10 primeiras linhas)</h3>
+                    <div class="preview-text">${previewLines.join('\n')}</div>
+                    <p class="info-text">Total de linhas no arquivo: ${csvData.length}</p>
+                </div>
+            `;
+
+            document.getElementById('errorContainer').innerHTML = '';
+        }
+
+        // Gerar arquivo completo
+        function generateFile() {
+            const errors = validateData();
+
+            if (errors.length > 0) {
+                displayErrors(errors);
+                return;
+            }
+
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+
+            progressContainer.style.display = 'block';
+            document.getElementById('errorContainer').innerHTML = '';
+
+            let allLines = [];
+            const totalLines = csvData.length;
+
+            // Processar em lotes para não travar o navegador
+            let currentLine = 0;
+            const batchSize = 100;
+
+            function processBatch() {
+                const endLine = Math.min(currentLine + batchSize, totalLines);
+
+                for (let i = currentLine; i < endLine; i++) {
+                    allLines.push(gerarLinhaPosicional(csvData[i]));
+                }
+
+                currentLine = endLine;
+                const progress = Math.round((currentLine / totalLines) * 100);
+                progressFill.style.width = progress + '%';
+                progressFill.textContent = progress + '%';
+                progressText.textContent = `Processando: ${currentLine} de ${totalLines} linhas`;
+
+                if (currentLine < totalLines) {
+                    setTimeout(processBatch, 10);
+                } else {
+                    finishGeneration(allLines);
+                }
+            }
+
+            processBatch();
+        }
+
+        function finishGeneration(lines) {
+            const content = lines.join('\n');
+
+            // Gerar nome do arquivo
+            const now = new Date();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const filename = `OdontoPREV${month}${year}.txt`;
+
+            // Download
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            document.getElementById('progressText').textContent = `Arquivo gerado com sucesso! ${lines.length} linhas processadas.`;
+
+            setTimeout(() => {
+                document.getElementById('progressContainer').style.display = 'none';
+            }, 3000);
+        }
+
+        // Exibir erros
+        function displayErrors(errors) {
+            const errorContainer = document.getElementById('errorContainer');
+            errorContainer.innerHTML = `
+                <div class="error-list">
+                    <h3 style="margin-bottom: 10px; color: #721c24;">
+                        Erros Encontrados (${errors.length})
+                    </h3>
+                    ${errors.map(err => `<div class="error-item">• ${err}</div>`).join('')}
+                </div>
+            `;
+            document.getElementById('previewContainer').innerHTML = '';
+        }
+
+        // Configurações (localStorage)
+        function saveConfiguration() {
+            const configName = document.getElementById('configName').value.trim();
+
+            if (!configName) {
+                alert('Por favor, informe um nome para a configuração');
+                return;
+            }
+
+            const configs = JSON.parse(localStorage.getItem('csvConverterConfigs') || '{}');
+            configs[configName] = {
+                mapping: fieldMapping,
+                delimiter: delimiter,
+                date: new Date().toISOString()
+            };
+
+            localStorage.setItem('csvConverterConfigs', JSON.stringify(configs));
+            document.getElementById('configName').value = '';
+
+            loadSavedConfigurations();
+            alert(`Configuração "${configName}" salva com sucesso!`);
+        }
+
+        function loadSavedConfigurations() {
+            const configs = JSON.parse(localStorage.getItem('csvConverterConfigs') || '{}');
+            const select = document.getElementById('configSelect');
+
+            select.innerHTML = '<option value="">-- Carregar Configuração --</option>';
+
+            Object.keys(configs).forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                select.appendChild(option);
+            });
+        }
+
+        function loadSelectedConfiguration() {
+            const configName = document.getElementById('configSelect').value;
+
+            if (!configName) return;
+
+            const configs = JSON.parse(localStorage.getItem('csvConverterConfigs') || '{}');
+            const config = configs[configName];
+
+            if (!config) return;
+
+            // Aplicar delimitador
+            delimiter = config.delimiter;
+            document.querySelectorAll('.delimiter-option').forEach(option => {
+                option.classList.remove('selected');
+                if (option.getAttribute('data-delimiter') === delimiter ||
+                    (delimiter === '\t' && option.getAttribute('data-delimiter') === '\\t')) {
+                    option.classList.add('selected');
+                }
+            });
+
+            // Aplicar mapeamento
+            fieldMapping = config.mapping;
+
+            // Atualizar interface
+            document.querySelectorAll('.drop-zone').forEach(dropZone => {
+                const fieldName = dropZone.dataset.field;
+                const columnName = fieldMapping[fieldName];
+                updateFieldDisplay(dropZone, columnName);
+            });
+
+            alert(`Configuração "${configName}" carregada com sucesso!`);
+        }
+
+        function deleteConfiguration(configName) {
+            if (!confirm(`Deseja realmente excluir a configuração "${configName}"?`)) {
+                return;
+            }
+
+            const configs = JSON.parse(localStorage.getItem('csvConverterConfigs') || '{}');
+            delete configs[configName];
+            localStorage.setItem('csvConverterConfigs', JSON.stringify(configs));
+
+            loadSavedConfigurations();
+        }
+    </script>
+</body>
+</html>
